@@ -1,4 +1,7 @@
 const inquirer = require('inquirer');
+const express = require('express');
+const mysql = require('mysql2');
+const cTable = require('console.table');
 const PORT = process.env.PORT || 3001;
 const app = express();
 
@@ -33,8 +36,7 @@ const questions = () => {
                         'View All Roles',
                         'Add Role',
                         'View All Departments',
-                        'Add Department',
-                        'ETC...']
+                        'Add Department']
         }
     ])
 }
@@ -46,31 +48,3 @@ const init = () => {
 
 init();
 
-
-
-// const mysql = require('mysql2');
-
-// // create connection to database
-// const connection = mysql.createConnection({
-//     host: 'localhost',
-//     user: 'root',
-//     database: 'test'
-// });
-
-// // simple query
-// connection.query(
-//     'SELECT * FROM `table` WHERE `name` = "Page" AND `age` > 45',
-//     function(err, results, fields) {
-//         console.log(results); // results contains rows returned by server
-//         console.log(fields); // fields contains extra metadata about results, if present
-//     }
-// );
-
-// // with placeholder
-// connection.query(
-//     'SELECT * FROM `table` WHERE `name` = ? AND `age` > ?',
-//     ['Page', 45],
-//     function(err, results) {
-//         console.log(results);
-//     }
-// );
