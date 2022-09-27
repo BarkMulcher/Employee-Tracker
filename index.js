@@ -74,18 +74,22 @@ const questions = async () => {
         switch (response.actions) {
             case 'all_employees':
                 rollCall();
+                questions();
                 break;
 
             case 'add_employee':
                 addEmployee();
+                questions();
                 break;
 
             case 'update_employee_role':
                 updateSingleRole();
+                questions();
                 break;
 
             case 'view_all_roles':
                 getRoster();
+                questions();
                 break;
         };
     } catch (err) {

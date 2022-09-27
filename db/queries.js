@@ -20,8 +20,13 @@ rollCall = async () => {
     const conx = await databaseConx();
 
     const [rows] = await conx.query(
-        `SELECT * FROM employee
-        ORDER BY name ASC;`
+        `SELECT employee.id,
+        CONCAT(employee.first_name, " ", employee.last_name) AS name,
+        roles.title,
+        department.department_name AS department,
+        roles.salary,
+        FROM employee 
+        ORDER BY id ASC;`
     )
 
     console.table(rows);
@@ -66,8 +71,6 @@ getRoster = async () => {
     );
 
     console.table(rows);
-    
-    queries;
 }
 
 module.exports = {
