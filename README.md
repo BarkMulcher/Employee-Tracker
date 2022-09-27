@@ -41,7 +41,7 @@ As the image illustrates, your schema should contain the following three tables:
 
 GIVEN a command-line application that accepts user input
 WHEN I start the application
-- [ / ] THEN I am presented with the following options: view all departments, view all roles, view all employees, add a department, add a role, add an employee, and update an employee role
+- [x] THEN I am presented with the following options: view all departments, view all roles, view all employees, add a department, add a role, add an employee, and update an employee role
 WHEN I choose to view all departments
 - [ ] THEN I am presented with a formatted table showing department names and department ids
 WHEN I choose to view all roles
@@ -85,7 +85,6 @@ Try to add some additional functionality to your application, such as the abilit
 - [ ] View the total utilized budget of a department—in other words, the combined salaries of all employees in that department.
 
 Grading Requirements
-note
 
 If a Challenge assignment submission is marked as “0”, it is considered incomplete and will not count towards your graduation requirements. Examples of incomplete submissions include the following:
 
