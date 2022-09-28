@@ -24,9 +24,11 @@ rollCall = async () => {
         CONCAT(employee.first_name, " ", employee.last_name) AS name,
         roles.title,
         department.department_name AS department,
-        roles.salary,
-        FROM employee 
-        ORDER BY id ASC;`
+        roles.salary
+        FROM employee, roles, department
+        WHERE employee.role_id = roles.id AND roles.department_id = department.id
+        ORDER BY employee.id ASC;`
+
     )
 
     console.table(rows);
@@ -36,7 +38,6 @@ rollCall = async () => {
     }
 }
 
-// change to editRoll and add emp removal options
 addEmployee = async () => {
     const conx = await databaseConx();
 
@@ -46,21 +47,57 @@ addEmployee = async () => {
 
     const managers = await conx.query(
         `SELECT * FROM employee 
-         WHERE employee.manager IS NULL`
+         WHERE employee.manager_id IS NULL`
     );
+
+    const roleChoice = await 
+        inquirer.prompt([
+            {
+                type: 'input',
+                name: 'firstName',
+                message: `What is the new employee's first name?`
+            },
+            {
+                type: 'input',
+                name: 'lastName',
+                message: `What is the new employee's last name?`
+            },
+            {
+                type: 'list',
+                name: 'roleId',
+                message: 'What role ID will this employee have?',
+                choices: roles.map((role) => {
+                    return {
+                        name: role.title,
+                        value: role.id
+                    }
+                }),
+            },
+            {
+                type: 'list',
+                name: 'empMgrId',
+                message: `Who will be this employee's manager?`,
+                choices: managers.map((manager) => {
+                    return {
+                        name: manager.first_name + " " + manager.last_name,
+                        value: manager.id
+                    }
+                })
+            }
+    ])
 
     console.table(managers);
 
 
 }
 
-updateSingleRole = async () => {
-    const conx = await databaseConx();
+// updateSingleRole = async () => {
+//     const conx = await databaseConx();
 
-    const rows = await conx.query(
-        ``
-    )
-}
+//     const rows = await conx.query(
+//         ``
+//     )
+// }
 
 getRoster = async () => {
     const conx = await databaseConx();
@@ -76,6 +113,6 @@ getRoster = async () => {
 module.exports = {
     rollCall,
     addEmployee,
-    updateSingleRole,
+    // updateSingleRole,
     getRoster
 }
