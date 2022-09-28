@@ -3,7 +3,7 @@ const cTable = require('console.table');
 const mysql = require('mysql2/promise');
 const chalk = require('chalk');
 const conx = require('./database');
-const queries = require('../index');
+// const queries = require('../index');
 
 
 databaseConx = async () => {
@@ -44,14 +44,16 @@ addEmployee = async () => {
     const roles = await conx.query(
         `SELECT * FROM roles`
     );
+    console.table(roles);
 
     const managers = await conx.query(
         `SELECT * FROM employee 
          WHERE employee.manager_id IS NULL`
     );
+    console.table(managers);
 
-    const roleChoice = await 
-        inquirer.prompt([
+
+    await inquirer.prompt([
             {
                 type: 'input',
                 name: 'firstName',
@@ -66,18 +68,18 @@ addEmployee = async () => {
                 type: 'list',
                 name: 'roleId',
                 message: 'What role ID will this employee have?',
-                choices: roles.map((role) => {
+                choices: roles.map(role => {
                     return {
                         name: role.title,
                         value: role.id
                     }
-                }),
+                })
             },
             {
                 type: 'list',
                 name: 'empMgrId',
                 message: `Who will be this employee's manager?`,
-                choices: managers.map((manager) => {
+                choices: managers.map(manager => {
                     return {
                         name: manager.first_name + " " + manager.last_name,
                         value: manager.id
