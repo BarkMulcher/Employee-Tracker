@@ -17,10 +17,10 @@ databaseConx = async () => {
 
 rollCall = async () => {
     try {
-    const conx = await databaseConx();
+        const conx = await databaseConx();
 
-    const [rows] = await conx.query(
-        `SELECT employee.id,
+        const [rows] = await conx.query(
+            `SELECT employee.id,
         CONCAT(employee.first_name, " ", employee.last_name) AS name,
         roles.title,
         department.department_name AS department,
@@ -29,9 +29,9 @@ rollCall = async () => {
         WHERE employee.role_id = roles.id AND roles.department_id = department.id
         ORDER BY employee.id ASC;`
 
-    )
+        )
 
-    console.table(rows);
+        console.table(rows);
     } catch (err) {
         console.log(err);
         questions();
@@ -39,21 +39,26 @@ rollCall = async () => {
 }
 
 addEmployee = async () => {
-    const conx = await databaseConx();
+    try {
+        console.log(chalk.underline.bgRed.bold(`Add New Employee \n`));
 
-    const roles = await conx.query(
-        `SELECT * FROM roles`
-    );
-    console.table(roles);
+        const conx = await databaseConx();
 
-    const managers = await conx.query(
-        `SELECT * FROM employee 
+        const [roles] = await conx.query(
+            `SELECT * FROM roles`
+        );
+
+
+        const [managers] = await conx.query(
+            `SELECT * FROM employee 
          WHERE employee.manager_id IS NULL`
-    );
-    console.table(managers);
+        );
 
 
-    await inquirer.prompt([
+        console.table(roles);
+        console.table(managers);
+
+        const response = await inquirer.prompt([
             {
                 type: 'input',
                 name: 'firstName',
@@ -86,20 +91,91 @@ addEmployee = async () => {
                     }
                 })
             }
-    ])
 
-    console.table(managers);
+        ])
+
+        let result = await conx.query(
+            `INSERT INTO employee SET ?`,
+            {
+                first_name: response.firstName,
+                last_name: response.lastName,
+                role_id: response.roleId,
+                manager_id: response.empMgrId
+            }
+        );
+
+        console.log(`${response.firstName} ${response.lastName} has been added successfully.`)
+
+    } catch (err) {
+        console.log(err);
+    }
 
 
 }
 
-// updateSingleRole = async () => {
-//     const conx = await databaseConx();
+updateSingleRole = async () => {
+    try {
+        const conx = await databaseConx();
 
-//     const rows = await conx.query(
-//         ``
-//     )
-// }
+        const [employee] = await conx.query(
+            `SELECT * FROM employee`
+        );
+
+        const updateChoice = employee.map(employeeName => {
+            return {
+                name: employeeName.first_name + ' ' + employeeName.last_name,
+                value: employeeName.id
+            }
+        })
+
+        console.table(employee);
+        let employeeResponse = await
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'employee',
+                    message: 'Choose an employee to update.',
+                    choices: updateChoice
+                }
+            ]);
+
+        const [roles] = await conx.query(
+            `SELECT * FROM roles`
+        );
+
+        const updateRole = roles.map(employeeRole => {
+            return {
+                name: employeeRole.title,
+                value: employeeRole.id
+            }
+        })
+
+        console.table(roles);
+        let roleResponse = await
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'role',
+                    message: 'Select the new role applicable to the employee.',
+                    choices: updateRole
+                }
+            ])
+
+        let result = await conx.query(
+            `UPDATE employee SET ? WHERE ?`,
+            [
+                { role_id: roleResponse.role },
+                { id: employeeResponse.employee }
+            ]
+        )
+
+        console.log(`Employee's role updated.`)
+
+
+    } catch (err) {
+        console.log(err);
+    }
+}
 
 getRoster = async () => {
     const conx = await databaseConx();
@@ -112,9 +188,124 @@ getRoster = async () => {
     console.table(rows);
 }
 
+addRole = async () => {
+    try {
+
+        console.log(chalk.underline.bgRed.bold(`Add New Role \n`));
+
+        const conx = await databaseConx();
+
+        const [department] = await conx.query(
+            `SELECT * FROM department`
+        )
+
+        // added this so user ensures not to duplicate
+        const [roles] = await conx.query(
+            `SELECT * FROM roles`
+        );
+        console.table(roles);
+
+        const deptChoice = department.map(roleDept => {
+            return {
+                name: roleDept.department_name,
+                value: roleDept.id
+            }
+        });
+
+        let response = await
+            inquirer.prompt([
+                {
+                    type: 'input',
+                    name: 'roleName',
+                    message: `What is the name of the new role you'd like to add?`,
+                },
+                {
+                    type: 'input',
+                    name: 'salary',
+                    message: 'What is the base salary of this role in $USD?',
+                },
+                {
+                    type: 'list',
+                    name: 'newRoleDept',
+                    message: 'To which of the following departments does the new role belong?',
+                    choices: deptChoice
+                }
+            ])
+
+        let userChoice = await conx.query(
+            `INSERT INTO roles SET ?`,
+            {
+                title: response.roleName,
+                salary: response.salary,
+                department_id: response.newRoleDept
+            }
+        );
+
+        console.log(chalk.bgRedBright(`New role added to roster.`))
+
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+viewDepartments = async () => {
+    const conx = await databaseConx();
+
+    const [rows] = await conx.query(
+        `SELECT * FROM department
+        ORDER BY id ASC;`
+    );
+
+    console.table(rows);
+}
+
+addDepartment = async () => {
+    try {
+        console.log(chalk.underline.bgRed.bold(`Add New Department\n`));
+
+        const conx = await databaseConx();
+
+        const [ rows ] = await conx.query(
+            `SELECT * FROM department`
+        );
+        console.table(rows);
+
+        const response = await
+            inquirer.prompt([
+                {
+                    type: 'input',
+                    name: 'newDept',
+                    message: `What is the name of the department you'd like to add?`
+                }
+            ])
+
+        let result = await conx.query(
+            `INSERT INTO department SET ?`,
+            {
+                department_name: response.newDept
+            }
+        );
+
+        console.log(`New department ${response.newDept} added.`)
+        
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+quit = () => {
+    conx.end;
+    process.exit();
+}
+
+
 module.exports = {
     rollCall,
     addEmployee,
-    // updateSingleRole,
-    getRoster
+    updateSingleRole,
+    getRoster,
+    addRole,
+    viewDepartments,
+    addDepartment,
+    quit
 }

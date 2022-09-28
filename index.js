@@ -95,6 +95,25 @@ const questions = async () => {
                 await getRoster();
                 questions();
                 break;
+
+            case 'add_role':
+                await addRole();
+                questions();
+                break;
+
+            case 'view_all_departments':
+                await viewDepartments();
+                questions();
+                break;
+            
+            case 'add_department':
+                await addDepartment();
+                questions();
+                break;
+            
+            case 'exit':
+                await quit();
+                break;
         };
     } catch (err) {
         console.log(err);
